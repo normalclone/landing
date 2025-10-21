@@ -493,7 +493,7 @@ export default function ExamsPage() {
     }))
   }, [])
 
-const handleQuickFilterToggle = useCallback((key: QuickFilterKey) => {
+  const handleQuickFilterToggle = useCallback((key: QuickFilterKey) => {
     setDraftFilters((previous) => ({
       ...previous,
       quickFilters: {
@@ -537,33 +537,7 @@ const handleQuickFilterToggle = useCallback((key: QuickFilterKey) => {
                 </button>
               </form>
             </div>
-            <div data-animate className="col-12 col-lg-4 fade-in-up">
-              <div className="d-flex flex-column gap-2 align-items-stretch align-items-lg-end">
-                <div className="w-100">
-                  <label className="form-label small text-slate mb-1">Sắp xếp</label>
-                  <select className={CLASS.select} value={sortBy} onChange={handleSortChange}>
-                    {SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button className={CLASS.outlineButton} type="button" onClick={handleResetFilters}>
-                  Xoá lọc
-                </button>
-              </div>
-            </div>
           </div>
-          {activeChips.length > 0 && (
-            <div data-animate className="d-flex flex-wrap gap-2 mt-4 fade-in-up">
-              {activeChips.map((chip) => (
-                <span className={CLASS.chip} key={chip}>
-                  {chip}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
@@ -580,48 +554,48 @@ const handleQuickFilterToggle = useCallback((key: QuickFilterKey) => {
                   <h2 className="h5 fw-semibold mb-4">Bộ lọc đề thi</h2>
 
                   {/* Độ khó */}
-                <div className="mb-4">
-                  <span className="text-slate text-uppercase small fw-semibold d-block mb-2">
-                    Độ khó
-                  </span>
-                  <div className="d-grid gap-2">
-                    {DIFFICULTY_OPTIONS.map((option) => (
-                      <label key={option.value} className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          name={`difficulty-${option.value}`}
-                          checked={draftFilters.difficulty.includes(option.value)}
-                          onChange={() =>
-                            handleDifficultyToggle(option.value)
-                          }
-                        />
-                        <span className="form-check-label">{option.label}</span>
-                      </label>
-                    ))}
+                  <div className="mb-4">
+                    <span className="text-slate text-uppercase small fw-semibold d-block mb-2">
+                      Độ khó
+                    </span>
+                    <div className="d-grid gap-2">
+                      {DIFFICULTY_OPTIONS.map((option) => (
+                        <label key={option.value} className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            name={`difficulty-${option.value}`}
+                            checked={draftFilters.difficulty.includes(option.value)}
+                            onChange={() =>
+                              handleDifficultyToggle(option.value)
+                            }
+                          />
+                          <span className="form-check-label">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Thời lượng */}
-                <div className="mb-4">
-                  <span className="text-slate text-uppercase small fw-semibold d-block mb-2">
-                    Thời lượng
-                  </span>
-                  <div className="d-grid gap-2">
-                    {DURATION_OPTIONS.map((option) => (
-                      <label key={option.value} className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="radio"
-                          name="duration"
-                          value={option.value}
-                          checked={draftFilters.durations.includes(option.value)}
-                          onChange={() => handleDurationSelect(option.value)}
-                        />
-                        <span className="form-check-label">{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
+                  {/* Thời lượng */}
+                  <div className="mb-4">
+                    <span className="text-slate text-uppercase small fw-semibold d-block mb-2">
+                      Thời lượng
+                    </span>
+                    <div className="d-grid gap-2">
+                      {DURATION_OPTIONS.map((option) => (
+                        <label key={option.value} className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="duration"
+                            value={option.value}
+                            checked={draftFilters.durations.includes(option.value)}
+                            onChange={() => handleDurationSelect(option.value)}
+                          />
+                          <span className="form-check-label">{option.label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Loại kỳ thi */}
@@ -670,14 +644,24 @@ const handleQuickFilterToggle = useCallback((key: QuickFilterKey) => {
 
             <div data-animate className="col-12 col-lg-9 fade-in-up">
               <div data-animate className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2 fade-in-up">
-                <div className="fw-semibold">
+                <div className="fw-semibold pt-4">
                   {total > 0 ? `${total} đề thi phù hợp` : "Không có đề thi phù hợp"}
                 </div>
                 <div className="text-slate small">
-                  Trang {page} • Hiển thị {exams.length} / {total}
+                  <div className="d-flex flex-column gap-2 align-items-stretch align-items-lg-end">
+                    <div className="w-100">
+                      <label className="form-label small text-slate mb-1">Sắp xếp</label>
+                      <select className={CLASS.select} value={sortBy} onChange={handleSortChange}>
+                        {SORT_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
-
               <div className="row g-4">
                 {exams.map((exam) => (
                   <div className="col-12 col-md-6 col-xl-4" key={exam.id}>
