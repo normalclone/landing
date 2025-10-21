@@ -541,7 +541,7 @@ export default function ExamsPage() {
         </div>
       </section>
 
-      <section className="section">
+      <section className="section pt-0">
         <div data-animate className="container py-5 fade-in">
           <div className="row g-4">
             <aside data-animate className="col-12 col-lg-3 fade-in-up">
@@ -635,9 +635,26 @@ export default function ExamsPage() {
                     </div>
                   </div>
 
-                  <button className={`${CLASS.primaryButton} w-100`} type="button" onClick={handleApplyFilters}>
-                    Áp dụng
-                  </button>
+                  <div className="d-flex align-items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-honey btn-icon d-inline-flex align-items-center justify-content-center flex-shrink-0"
+                      onClick={handleResetFilters}
+                      aria-label="Reset filters"
+                    >
+                      <span className="visually-hidden">Đặt lại bộ lọc</span>
+                      <span aria-hidden="true" className="btn-icon__glyph">
+                        ↻
+                      </span>
+                    </button>
+                    <button
+                      className={`${CLASS.primaryButton} flex-grow-1`}
+                      type="button"
+                      onClick={handleApplyFilters}
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
                 </div>
               </div>
             </aside>
