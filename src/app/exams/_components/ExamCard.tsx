@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -10,7 +9,6 @@ import {
   type KeyboardEvent,
   type TransitionEvent,
 } from "react"
-import { useRouter } from "next/navigation"
 import { createPortal } from "react-dom"
 
 export type Difficulty = "easy" | "medium" | "hard"
@@ -83,13 +81,11 @@ const dateFormatter = new Intl.DateTimeFormat("vi-VN", {
 
 export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
   const cardRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
   const [isBrowser, setIsBrowser] = useState(false)
   const [transitionRect, setTransitionRect] = useState<Rect | null>(null)
   const [targetRect, setTargetRect] = useState<Rect | null>(null)
   const [isTransitionActive, setIsTransitionActive] = useState(false)
   const [isTransitionExpanded, setIsTransitionExpanded] = useState(false)
-  const [shouldNavigate, setShouldNavigate] = useState(false)
 
   useEffect(() => {
     setIsBrowser(true)
@@ -105,32 +101,18 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     }
   }, [isBrowser, isTransitionActive])
 
-  const handleStartExam = useCallback(() => {
-    const href = `/exams/${exam.id}`
-    if (isBrowser) {
-      router.push(href)
-      return
-    }
-
-    if (typeof window !== "undefined") {
-      window.location.href = href
-    }
-  }, [exam.id, isBrowser, router])
-
   const beginModalOpen = () => {
     if (isTransitionActive) {
       return
     }
 
     if (!isBrowser) {
-      handleStartExam()
       return
     }
 
     const rect = cardRef.current?.getBoundingClientRect()
 
     if (!rect) {
-      handleStartExam()
       return
     }
 
@@ -150,7 +132,6 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     setTargetRect({ top, left, width, height })
     setIsTransitionExpanded(false)
     setIsTransitionActive(true)
-    setShouldNavigate(true)
 
     requestAnimationFrame(() => setIsTransitionExpanded(true))
   }
@@ -174,19 +155,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     setIsTransitionExpanded(false)
     setTransitionRect(null)
     setTargetRect(null)
-    if (shouldNavigate) {
-      setShouldNavigate(false)
-      handleStartExam()
-    }
   }
-
-  useEffect(() => {
-    if (!shouldNavigate) return
-    if (isTransitionActive || isTransitionExpanded) return
-
-    setShouldNavigate(false)
-    handleStartExam()
-  }, [handleStartExam, isTransitionActive, isTransitionExpanded, shouldNavigate])
 
   const currentTransitionRect =
     isTransitionExpanded && targetRect ? targetRect : transitionRect
