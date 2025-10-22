@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -12,7 +13,11 @@ import {
 import { createPortal } from "react-dom"
 
 export type Difficulty = "easy" | "medium" | "hard"
-export type ExamType = "THPT" | "Đại học" | "Công chức" | "Chứng chỉ"
+export type ExamType =
+  | "THPT"
+  | "Đại học"
+  | "Công chức"
+  | "Chứng chỉ"
 
 export type Exam = {
   id: string
@@ -86,6 +91,10 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
   const [targetRect, setTargetRect] = useState<Rect | null>(null)
   const [isTransitionActive, setIsTransitionActive] = useState(false)
   const [isTransitionExpanded, setIsTransitionExpanded] = useState(false)
+  const [isModalPinned, setIsModalPinned] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
+
+  const isCardActive = isTransitionActive || isModalPinned
 
   useEffect(() => {
     setIsBrowser(true)
@@ -94,12 +103,67 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
   useEffect(() => {
     if (!isBrowser) return
 
-    document.body.classList.toggle("modal-open", isTransitionActive)
+    const shouldLockScroll = isTransitionActive || isModalPinned
+    document.body.classList.toggle("modal-open", shouldLockScroll)
 
     return () => {
       document.body.classList.remove("modal-open")
     }
-  }, [isBrowser, isTransitionActive])
+  }, [isBrowser, isModalPinned, isTransitionActive])
+
+  const calculateTargetRect = useCallback((): Rect | null => {
+    if (typeof window === "undefined") {
+      return null
+    }
+
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+    const margin = viewportWidth < 480 ? 16 : 32
+    const width = Math.min(viewportWidth - margin * 2, 960)
+    const height = Math.min(viewportHeight - margin * 2, 640)
+    const extraLeftOffset =
+      viewportWidth > 1440
+        ? (viewportWidth - width) * 0.04
+        : viewportWidth > 1024
+        ? (viewportWidth - width) * 0.02
+        : 0
+    const top = Math.max((viewportHeight - height) / 2, margin)
+    const left = Math.max((viewportWidth - width) / 2 - extraLeftOffset, margin)
+
+    return { top, left, width, height }
+  }, [])
+
+  useEffect(() => {
+    if (!isBrowser) return
+    if (!isTransitionActive && !isModalPinned) return
+
+    const handleResize = () => {
+      const nextTarget = calculateTargetRect()
+      if (nextTarget) {
+        setTargetRect(nextTarget)
+      }
+      if (isTransitionActive && !isModalPinned) {
+        const nextRect = cardRef.current?.getBoundingClientRect()
+        if (nextRect) {
+          setTransitionRect({
+            top: nextRect.top,
+            left: nextRect.left,
+            width: nextRect.width,
+            height: nextRect.height,
+          })
+        }
+      }
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    window.addEventListener("orientationchange", handleResize)
+
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      window.removeEventListener("orientationchange", handleResize)
+    }
+  }, [calculateTargetRect, isBrowser, isModalPinned, isTransitionActive])
 
   const beginModalOpen = () => {
     if (isTransitionActive) {
@@ -116,12 +180,10 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
       return
     }
 
-    const viewportWidth = window.innerWidth
-    const viewportHeight = window.innerHeight
-    const width = Math.min(viewportWidth - 32, 960)
-    const height = Math.min(viewportHeight - 32, 640)
-    const top = Math.max((viewportHeight - height) / 2, 16)
-    const left = Math.max((viewportWidth - width) / 2, 16)
+    const target = calculateTargetRect()
+    if (!target) {
+      return
+    }
 
     setTransitionRect({
       top: rect.top,
@@ -129,9 +191,11 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
       width: rect.width,
       height: rect.height,
     })
-    setTargetRect({ top, left, width, height })
+    setTargetRect(target)
     setIsTransitionExpanded(false)
     setIsTransitionActive(true)
+    setIsModalPinned(false)
+    setShowDetails(false)
 
     requestAnimationFrame(() => setIsTransitionExpanded(true))
   }
@@ -151,10 +215,9 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     if (!isTransitionExpanded) return
     if (event.target !== event.currentTarget) return
 
+    setIsModalPinned(true)
     setIsTransitionActive(false)
-    setIsTransitionExpanded(false)
-    setTransitionRect(null)
-    setTargetRect(null)
+    setShowDetails(true)
   }
 
   const currentTransitionRect =
@@ -176,7 +239,10 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
         overflow: "hidden",
         zIndex: 1060,
         background: "var(--bs-body-bg, #fff)",
-        pointerEvents: "none",
+        pointerEvents: isModalPinned ? "auto" : "none",
+        cursor: isModalPinned ? "default" : "auto",
+        "--exam-outline": difficultyOutlineColors[exam.difficulty],
+        "--exam-outline-soft": difficultyOutlineSoftColors[exam.difficulty],
       }
     : undefined
 
@@ -198,7 +264,9 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
         <span className="badge bg-light text-slate border">
           Điểm TB: {exam.avgScore.toFixed(1)}
         </span>
-        <span className="badge bg-light text-slate border">Người tạo: {exam.creator}</span>
+        <span className="badge bg-light text-slate border">
+          Người tạo: {exam.creator}
+        </span>
         <span className="badge bg-light text-slate border">
           Cập nhật: {dateFormatter.format(new Date(exam.updatedAt))}
         </span>
@@ -206,28 +274,92 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     </div>
   )
 
+  const renderExpandedDetails = () => {
+    const highlightBadges: string[] = []
+    if (exam.flags.topRated) {
+      highlightBadges.push("Được đánh giá cao")
+    }
+    if (exam.flags.mostTaken) {
+      highlightBadges.push("Nhiều lượt tham gia")
+    }
+    if (exam.flags.recent) {
+      highlightBadges.push("Vừa cập nhật")
+    }
+
+    return (
+      <div
+        className={`exam-card-details card-body border-top pt-3 ${showDetails ? "is-visible" : ""}`}
+      >
+        <div className="row g-3 small text-slate">
+          <div className="col-sm-6">
+            <span className="text-uppercase text-body-secondary fw-semibold d-block mb-1">
+              Loại đề
+            </span>
+            <span className="fw-medium text-body">{exam.type}</span>
+          </div>
+          <div className="col-sm-6">
+            <span className="text-uppercase text-body-secondary fw-semibold d-block mb-1">
+              Mức độ
+            </span>
+            <span className="fw-medium text-body">{difficultyLabels[exam.difficulty]}</span>
+          </div>
+          <div className="col-sm-6">
+            <span className="text-uppercase text-body-secondary fw-semibold d-block mb-1">
+              Lượt thi
+            </span>
+            <span className="fw-medium text-body">{exam.attempts.toLocaleString("vi-VN")}</span>
+          </div>
+          <div className="col-sm-6">
+            <span className="text-uppercase text-body-secondary fw-semibold d-block mb-1">
+              Điểm trung bình
+            </span>
+            <span className="fw-medium text-body">{exam.avgScore.toFixed(1)} / 10</span>
+          </div>
+        </div>
+
+        {highlightBadges.length > 0 ? (
+          <div className="mt-3 d-flex flex-wrap gap-2">
+            {highlightBadges.map((label) => (
+              <span key={label} className="badge bg-light text-success border border-success">
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
+  const baseCardClassName = `exam-card card card-surface shadow-sm h-100 ${difficultyCardClasses[
+    exam.difficulty
+  ]} ${isCardActive ? "exam-card--active" : ""}`
+
+  const overlayCardClassName = `exam-card card card-surface shadow-sm ${difficultyCardClasses[
+    exam.difficulty
+  ]} ${isCardActive ? "exam-card--active" : ""}`
+
   return (
     <>
       <div
-        className={`exam-card card card-surface shadow-sm h-100 ${difficultyCardClasses[
-          exam.difficulty
-        ]}`}
+        className={baseCardClassName}
         ref={cardRef}
         role="button"
         tabIndex={0}
         onClick={handleCardClick}
         onKeyDown={handleCardKeyDown}
+        aria-pressed={isCardActive}
         style={
           {
             "--exam-outline": difficultyOutlineColors[exam.difficulty],
             "--exam-outline-soft": difficultyOutlineSoftColors[exam.difficulty],
+            cursor: isModalPinned ? "default" : undefined,
           } as CSSProperties
         }
       >
         {renderCardSummary()}
       </div>
 
-      {isTransitionActive && transitionStyle && isBrowser
+      {isCardActive && transitionStyle && isBrowser
         ? createPortal(
             <>
               <div
@@ -235,12 +367,13 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
                 style={{ zIndex: 1055, transition: "opacity 320ms ease" }}
               />
               <div
-                className={`exam-card card card-surface shadow-sm ${difficultyCardClasses[exam.difficulty]}`}
+                className={overlayCardClassName}
                 style={transitionStyle}
                 onTransitionEnd={handleTransitionEnd}
                 aria-hidden
               >
                 {renderCardSummary()}
+                {renderExpandedDetails()}
               </div>
             </>,
             document.body

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ExamCard, type Exam, type Difficulty, type ExamType } from "./_components/ExamCard"
@@ -765,6 +765,7 @@ function applyFilters(exams: Exam[], params: GetExamParams): Exam[] {
   })
 }
 
+
 function sortExams(exams: Exam[], sortBy: SortOption, query?: string): Exam[] {
   const sorted = [...exams]
   const term = query?.toLowerCase().trim()
@@ -832,6 +833,7 @@ function delay(ms: number) {
   })
 }
 
+
 function generateMockExams(count: number): Exam[] {
   const now = Date.now()
   return Array.from({ length: count }).map((_, index) => {
@@ -840,7 +842,7 @@ function generateMockExams(count: number): Exam[] {
     const difficulty = pickRandom(DIFFICULTY_OPTIONS).value
     const duration = pickRandom([15, 20, 25, 30, 40, 45, 50, 60, 75, 90])
     const attempts = randomInt(120, 5400)
-    const avgScore = Number((randomFloat(5.0, 9.6)).toFixed(1))
+    const avgScore = Number(randomFloat(5.0, 9.6).toFixed(1))
     const daysAgo = randomInt(0, 180)
     const updatedAt = new Date(now - daysAgo * 24 * 60 * 60 * 1000).toISOString()
     const creator = pickRandom(CREATORS)
@@ -873,7 +875,6 @@ function generateMockExams(count: number): Exam[] {
     return exam
   })
 }
-
 function pickRandom<T>(items: ReadonlyArray<T>): T {
   return items[Math.floor(Math.random() * items.length)]
 }

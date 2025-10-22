@@ -697,6 +697,25 @@ html[data-bs-theme="dark"] .shadow-card {
   animation: outline-highlight 1.8s ease-in-out infinite;
 }
 
+.exam-card.exam-card--active {
+  transform: translateY(-6px);
+  outline-color: var(--exam-outline);
+  outline-offset: 0;
+  box-shadow: 0 18px 35px var(--exam-shadow-base);
+  animation: none;
+}
+
+.exam-card-details {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.exam-card-details.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @keyframes outline-highlight {
   0% {
     box-shadow: 0 18px 35px var(--exam-shadow-base), 0 0 0 0 var(--exam-outline);
