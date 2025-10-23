@@ -55,6 +55,170 @@ const DURATION_OPTIONS = [
 
 const EXAM_TYPES: ReadonlyArray<ExamType> = ["THPT", "Đại học", "Công chức", "Chứng chỉ"]
 
+const SCORE_DISTRIBUTION_TEMPLATES = [
+  [
+    { range: "0 - 3", percent: 6 },
+    { range: "3 - 5", percent: 18 },
+    { range: "5 - 7", percent: 32 },
+    { range: "7 - 8.5", percent: 28 },
+    { range: "8.5 - 10", percent: 16 },
+  ],
+  [
+    { range: "0 - 3", percent: 3 },
+    { range: "3 - 5", percent: 12 },
+    { range: "5 - 7", percent: 28 },
+    { range: "7 - 8.5", percent: 34 },
+    { range: "8.5 - 10", percent: 23 },
+  ],
+  [
+    { range: "0 - 3", percent: 9 },
+    { range: "3 - 5", percent: 22 },
+    { range: "5 - 7", percent: 36 },
+    { range: "7 - 8.5", percent: 24 },
+    { range: "8.5 - 10", percent: 9 },
+  ],
+] as const
+
+const PRE_EXAM_GUIDES = [
+  "Kiểm tra cấu trúc đề minh họa mới nhất và ôn kỹ các chủ điểm trọng tâm.",
+  "Chuẩn bị máy tính, giấy nháp và đảm bảo đường truyền ổn định trước giờ thi.",
+  "Đọc kỹ hướng dẫn làm bài để tránh bỏ sót các câu yêu cầu dạng tự luận.",
+  "Canh thời gian hợp lý cho từng phần, ưu tiên các câu hỏi chắc chắn trước.",
+]
+
+const POST_EXAM_NOTES = [
+  "Đối chiếu đáp án chính thức và ghi chú lại những câu sai để rà soát kiến thức.",
+  "Nộp phản hồi nếu phát hiện lỗi đề hoặc câu hỏi chưa rõ ràng.",
+  "Review lại những câu làm mất nhiều thời gian để tối ưu chiến lược cho lần thi chính.",
+]
+
+const FEEDBACK_HIGHLIGHTS = [
+  "Nhiều câu hỏi bám sát đề minh họa mới nhất.",
+  "Độ khó phân hóa rõ, phù hợp luyện thi nước rút.",
+  "Tài liệu giải chi tiết giúp tự học dễ dàng hơn.",
+  "Kho câu hỏi cập nhật hàng tháng theo góp ý của giáo viên.",
+]
+
+const CHANGELOG_NOTES = [
+  "Điều chỉnh lại thứ tự câu hỏi để tăng độ phân hóa năng lực.",
+  "Bổ sung thêm 2 câu vận dụng cao vào phần cuối đề.",
+  "Cập nhật đáp án chi tiết và mẹo ghi điểm nhanh.",
+  "Rà soát chính tả, chuẩn hóa thống nhất ký hiệu.",
+]
+
+const SUBJECT_TOPICS: Record<string, string[]> = {
+  Toán: [
+    "phương trình mũ - logarit",
+    "hình học không gian Oxyz",
+    "giới hạn và đạo hàm",
+    "tích phân ứng dụng thực tế",
+  ],
+  Văn: [
+    "phân tích hình tượng nhân vật trung tâm",
+    "đánh giá nghệ thuật xây dựng tình huống truyện",
+    "so sánh các hình ảnh biểu tượng",
+    "bình luận quan điểm sáng tác của tác giả",
+  ],
+  Anh: [
+    "ngữ pháp thì hoàn thành tiếp diễn",
+    "cách sử dụng mệnh đề quan hệ rút gọn",
+    "từ vựng chủ đề môi trường",
+    "chiến lược làm bài đọc hiểu nhanh",
+  ],
+  Lý: [
+    "dao động điều hòa và năng lượng",
+    "mạch xoay chiều RLC",
+    "cảm ứng điện từ",
+    "lượng tử ánh sáng",
+  ],
+  Hóa: [
+    "cân bằng phản ứng oxi hóa khử",
+    "tổng hợp và nhận biết este",
+    "cấu trúc peptit trong protein",
+    "tốc độ phản ứng và cân bằng hóa học",
+  ],
+  Sinh: [
+    "quy luật di truyền phân li độc lập",
+    "điều hòa hoạt động gen ở sinh vật",
+    "tiến hóa nhỏ và quần thể sinh vật",
+    "sinh thái học quần xã",
+  ],
+  Sử: [
+    "phong trào giải phóng dân tộc Đông Nam Á",
+    "Việt Nam thời kỳ đổi mới 1986-2000",
+    "chiến dịch Điện Biên Phủ 1954",
+    "chính sách kinh tế mới của Liên Xô",
+  ],
+  Địa: [
+    "vùng kinh tế trọng điểm phía Nam",
+    "biến đổi khí hậu và tài nguyên nước Việt Nam",
+    "các trung tâm công nghiệp trọng điểm",
+    "đặc điểm dân cư và đô thị hóa",
+  ],
+  GDCD: [
+    "quyền và nghĩa vụ công dân trong Hiến pháp",
+    "các nguyên tắc xây dựng pháp luật",
+    "đạo đức nghề nghiệp và trách nhiệm xã hội",
+    "quyền tự do kinh doanh theo pháp luật",
+  ],
+  "Tin học": [
+    "thuật toán sắp xếp và phân tích độ phức tạp",
+    "ứng dụng bảng tính trong xử lý dữ liệu",
+    "cơ sở lập trình hướng đối tượng",
+  "mạng máy tính và bảo mật thông tin",
+  ],
+}
+
+const DEFAULT_TOPICS = [
+  "nhận diện dạng bài trọng tâm",
+  "các lỗi thường gặp khi làm bài",
+  "phương pháp loại trừ đáp án nhanh",
+  "mẹo ghi nhớ kiến thức nền tảng",
+]
+
+const ACTIVITY_TIME_FORMATTER = new Intl.DateTimeFormat("vi-VN", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+})
+
+const FEEDBACK_COMMENTERS = [
+  "Minh Trí",
+  "Lan Anh",
+  "Quỳnh Chi",
+  "Khánh Duy",
+  "Thu Hà",
+  "Ngọc Bích",
+  "Hoàng Anh",
+  "Phương Linh",
+  "Gia Huy",
+  "Trúc Ly",
+]
+
+const FEEDBACK_COMMENT_MESSAGES = [
+  "Đề bám rất sát cấu trúc mới, phần lý thuyết phân chia rõ ràng nên ôn tập dễ.",
+  "Câu hỏi vận dụng cao khá thử thách nhưng có lời giải chi tiết nên theo kịp.",
+  "Thời lượng 60 phút là hợp lý, giúp luyện cách phân bổ thời gian lúc đi thi.",
+  "Các câu hỏi đọc hiểu cập nhật chủ đề thời sự, làm mình thấy hứng thú hơn nhiều.",
+  "Nhóm câu hỏi cuối có độ khó tăng dần, rất giống đề của Sở năm vừa rồi.",
+  "Sau khi nộp bài xem lại đáp án khá dễ hiểu, các mẹo giải được ghi chú rõ.",
+  "Đề có nhiều câu phân hóa tốt, bạn nào luyện kỹ sẽ nắm chắc cấu trúc.",
+  "Kho câu hỏi giống như một mini mock test, phù hợp để kiểm tra nhanh kiến thức.",
+]
+
+const FEEDBACK_AVATAR_COLORS = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#f97316",
+  "#10b981",
+  "#0ea5e9",
+  "#f59e0b",
+  "#db2777",
+]
+
 type QuickFilterKey = "topRated" | "mostTaken" | "recent"
 
 const QUICK_FILTERS: { key: QuickFilterKey; label: string }[] = [
@@ -870,10 +1034,217 @@ function generateMockExams(count: number): Exam[] {
         mostTaken,
         recent,
       },
+      passScore: generatePassScore(difficulty),
+      certificateEnabled: topRated || avgScore >= 8.2 || Math.random() > 0.55,
+      timeLimit: Math.random() > 0.12 ? duration : 0,
+      allowPause: Math.random() > (difficulty === "hard" ? 0.58 : 0.36),
+      uniqueCandidates: Math.min(
+        attempts,
+        Math.max(1, Math.round(attempts * randomFloat(0.45, 0.82)))
+      ),
+      scoreDistribution: generateScoreDistribution(avgScore),
+      preExamNote: pickRandom(PRE_EXAM_GUIDES),
+      postExamNote: pickRandom(POST_EXAM_NOTES),
+      sampleQuestions: generateSampleQuestions(subject),
+      activityHistory: generateActivityHistory(updatedAt, creator),
+      feedback: generateFeedback(avgScore),
     }
 
     return exam
   })
+}
+
+function generatePassScore(difficulty: Difficulty): number {
+  switch (difficulty) {
+    case "easy":
+      return Number(randomFloat(5.0, 6.4).toFixed(1))
+    case "medium":
+      return Number(randomFloat(6.0, 7.4).toFixed(1))
+    case "hard":
+    default:
+      return Number(randomFloat(7.0, 8.6).toFixed(1))
+  }
+}
+
+function generateScoreDistribution(avgScore: number): Exam["scoreDistribution"] {
+  const templateIndex = avgScore >= 8 ? 1 : avgScore <= 6.2 ? 2 : 0
+  const template = SCORE_DISTRIBUTION_TEMPLATES[templateIndex]
+
+  const jittered = template.map((bucket) => ({
+    range: bucket.range,
+    percent: Math.max(1, bucket.percent + randomInt(-2, 2)),
+  }))
+
+  const total = jittered.reduce((sum, bucket) => sum + bucket.percent, 0)
+  const normalized = jittered.map((bucket) => ({
+    range: bucket.range,
+    percent: Math.max(0, Math.round((bucket.percent / total) * 100)),
+  }))
+
+  let diff = 100 - normalized.reduce((sum, bucket) => sum + bucket.percent, 0)
+  while (diff !== 0) {
+    const targetIndex =
+      diff > 0 ? normalized.length - 1 : normalized.findIndex((bucket) => bucket.percent > 0)
+    if (targetIndex < 0) {
+      break
+    }
+    if (diff > 0) {
+      normalized[targetIndex].percent += 1
+      diff -= 1
+    } else {
+      normalized[targetIndex].percent -= 1
+      diff += 1
+    }
+  }
+
+  return normalized
+}
+
+function generateSampleQuestions(subject: string): string[] {
+  const subjectTopics = SUBJECT_TOPICS[subject] ?? DEFAULT_TOPICS
+  const pool = [...subjectTopics]
+  if (pool.length < 3) {
+    pool.push(...DEFAULT_TOPICS)
+  }
+
+  const questions: string[] = []
+  while (questions.length < 3 && pool.length > 0) {
+    const index = randomInt(0, pool.length - 1)
+    const topic = pool.splice(index, 1)[0]
+    questions.push(
+      `Trình bày ngắn gọn về "${capitalize(topic)}" trong môn ${subject} và nêu ví dụ minh họa.`
+    )
+  }
+
+  while (questions.length < 3) {
+    const fallback = pickRandom(DEFAULT_TOPICS)
+    questions.push(
+      `Phân tích vì sao "${capitalize(fallback)}" thường xuất hiện trong đề môn ${subject}.`
+    )
+  }
+
+  return questions
+}
+
+function generateActivityHistory(updatedAt: string, creator: string): Exam["activityHistory"] {
+  const updatedDate = new Date(updatedAt)
+  const publishedDate = randomizeTime(subtractDays(updatedDate, randomInt(2, 16)))
+  const revisedDate = randomizeTime(subtractDays(updatedDate, randomInt(9, 36)))
+  const createdDate = randomizeTime(subtractDays(updatedDate, randomInt(40, 120)))
+
+  return [
+    { label: `Tạo bởi ${creator}`, timestamp: formatActivityTimestamp(createdDate) },
+    { label: "Sửa nội dung ngân hàng câu hỏi", timestamp: formatActivityTimestamp(revisedDate) },
+    { label: "Phát hành phiên bản mới", timestamp: formatActivityTimestamp(publishedDate) },
+    {
+      label: "Ghi chú thay đổi phiên bản",
+      timestamp: `${formatActivityTimestamp(updatedDate)} – ${pickRandom(CHANGELOG_NOTES)}`,
+    },
+  ]
+}
+
+function generateFeedback(avgScore: number): Exam["feedback"] {
+  const base = Math.min(4.9, Math.max(3.6, avgScore / 2 + randomFloat(-0.35, 0.45)))
+  return {
+    rating: Number(base.toFixed(1)),
+    totalReviews: randomInt(24, 460),
+    highlight: pickRandom(FEEDBACK_HIGHLIGHTS),
+    comments: generateFeedbackComments(avgScore),
+  }
+}
+
+function generateFeedbackComments(avgScore: number): Exam["feedback"]["comments"] {
+  const commentsCount = randomInt(3, 4)
+  const usedNames = new Set<string>()
+
+  return Array.from({ length: commentsCount }).map((_, index) => {
+    const name = pickUniqueName(FEEDBACK_COMMENTERS, usedNames)
+    const rating = Math.min(5, Math.max(3, Math.round(avgScore / 2 + randomFloat(-0.2, 1.1))))
+    const message = pickRandom(FEEDBACK_COMMENT_MESSAGES)
+    const minutesAgo = randomInt(45, 60 * 24 * 21)
+
+    return {
+      id: `comment-${index + 1}-${randomInt(100, 999)}`,
+      name,
+      avatarInitials: createInitials(name),
+      avatarColor: pickRandom(FEEDBACK_AVATAR_COLORS),
+      rating,
+      message,
+      timestamp: formatRelativeTimeFromMinutes(minutesAgo),
+    }
+  })
+}
+
+function randomizeTime(date: Date): Date {
+  const cloned = new Date(date)
+  cloned.setHours(randomInt(7, 21), randomInt(0, 59), 0, 0)
+  return cloned
+}
+
+function subtractDays(date: Date, days: number): Date {
+  const cloned = new Date(date)
+  cloned.setDate(cloned.getDate() - days)
+  return cloned
+}
+
+function formatActivityTimestamp(date: Date): string {
+  return ACTIVITY_TIME_FORMATTER.format(date)
+}
+
+function capitalize(text: string): string {
+  if (!text) {
+    return text
+  }
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
+function pickUniqueName(pool: ReadonlyArray<string>, used: Set<string>): string {
+  const available = pool.filter((item) => !used.has(item))
+  const name = available.length > 0 ? pickRandom(available) : pickRandom(pool)
+  used.add(name)
+  return name
+}
+
+function createInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 0) {
+    return "?"
+  }
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase()
+  }
+  const first = parts[0].charAt(0)
+  const last = parts[parts.length - 1].charAt(0)
+  return `${first}${last}`.toUpperCase()
+}
+
+function formatRelativeTimeFromMinutes(totalMinutes: number): string {
+  if (totalMinutes < 60) {
+    return `${Math.max(1, totalMinutes)} phút trước`
+  }
+
+  const hours = Math.round(totalMinutes / 60)
+  if (hours < 24) {
+    return `${Math.max(1, hours)} giờ trước`
+  }
+
+  const days = Math.round(totalMinutes / (60 * 24))
+  if (days < 7) {
+    return `${Math.max(1, days)} ngày trước`
+  }
+
+  const weeks = Math.round(days / 7)
+  if (weeks < 5) {
+    return `${Math.max(1, weeks)} tuần trước`
+  }
+
+  const months = Math.round(days / 30)
+  if (months < 12) {
+    return `${Math.max(1, months)} tháng trước`
+  }
+
+  const years = Math.max(1, Math.round(days / 365))
+  return `${years} năm trước`
 }
 function pickRandom<T>(items: ReadonlyArray<T>): T {
   return items[Math.floor(Math.random() * items.length)]
