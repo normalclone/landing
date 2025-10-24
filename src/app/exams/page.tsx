@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ExamCard, type Exam, type Difficulty, type ExamType } from "./_components/ExamCard"
+import { ExamCardSkeleton } from "./_components/ExamCardSkeleton"
 
 // Ánh xạ nhanh các className sẵn có để tránh sai khác phong cách giao diện
 const CLASS = {
@@ -680,6 +681,8 @@ export default function ExamsPage() {
     setSortBy("relevance")
   }, [])
 
+  const skeletonCount = page === 1 ? PAGE_SIZE : Math.min(6, PAGE_SIZE)
+
   return (
     <main>
       <section className="section pb-0 bg-surface border-bottom border-soft">
@@ -849,6 +852,13 @@ export default function ExamsPage() {
                     <ExamCard exam={exam} />
                   </div>
                 ))}
+
+                {isLoading &&
+                  Array.from({ length: skeletonCount }).map((_, index) => (
+                    <div className="col-12 col-md-6 col-xl-4" key={`skeleton-${index}`} aria-hidden="true">
+                      <ExamCardSkeleton />
+                    </div>
+                  ))}
               </div>
 
               {isLoading && (

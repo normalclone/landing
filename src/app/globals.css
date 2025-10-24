@@ -112,6 +112,55 @@ body {
   }
 }
 
+.skeleton-block {
+  position: relative;
+  border-radius: 0.5rem;
+  background: var(--slate-soft);
+  overflow: hidden;
+}
+
+html[data-bs-theme="dark"] .skeleton-block {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.skeleton-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0)
+  );
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+html[data-bs-theme="dark"] .skeleton-block::after {
+  background: linear-gradient(
+    90deg,
+    rgba(8, 26, 58, 0),
+    rgba(148, 163, 184, 0.3),
+    rgba(8, 26, 58, 0)
+  );
+}
+
+.skeleton-pill {
+  height: 1.5rem;
+  border-radius: 999px;
+}
+
+.exam-card-skeleton .card-body {
+  min-height: 240px;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .fade-in-up {
   opacity: 0;
   transform: translateY(16px);
