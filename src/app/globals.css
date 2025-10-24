@@ -45,6 +45,11 @@ body.modal-open {
   touch-action: none;
 }
 
+body.bee-loader-active {
+  overflow: hidden;
+  touch-action: none;
+}
+
 html,
 body {
   height: 100%;
