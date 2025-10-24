@@ -1,7 +1,11 @@
-.floating-theme-toggle {
+.floating-theme-toggle-wrapper {
   position: fixed;
   bottom: 1.5rem;
-  right: 1.5rem;
+  right: calc(1.5rem + var(--scrollbar-compensation, 0px));
+  z-index: 1050;
+}
+
+.floating-theme-toggle {
   width: 3.125rem;
   height: 3.125rem;
   display: inline-flex;
@@ -13,7 +17,6 @@
   color: var(--paper);
   cursor: pointer;
   transition: background 0.3s ease, transform 0.5s ease-in-out;
-  z-index: 1050;
 }
 
 .floating-theme-toggle:hover {
@@ -66,9 +69,12 @@
 }
 
 @media (max-width: 576px) {
-  .floating-theme-toggle {
+  .floating-theme-toggle-wrapper {
     bottom: 1rem;
-    right: 1rem;
+    right: calc(1rem + var(--scrollbar-compensation, 0px));
+  }
+
+  .floating-theme-toggle {
     width: 2.75rem;
     height: 2.75rem;
   }

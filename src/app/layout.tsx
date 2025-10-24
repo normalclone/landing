@@ -5,6 +5,7 @@ import { PageTransitionBee } from "../components/page-transition/PageTransitionB
 import { FloatingThemeToggle } from "../components/theme-toggle/FloatingThemeToggle";
 import { Header } from "@/components/header/Header";
 import { Footer } from "@/components/footer/Footer";
+import { ScrollbarCompensationManager } from "@/components/scrollbar/ScrollbarCompensationManager";
 
 export const metadata: Metadata = {
   title: "Beexamine – Luyện thi thông minh • Xếp hạng minh bạch",
@@ -28,6 +29,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body>
+        <ScrollbarCompensationManager />
         <PageTransitionBee />
         <Header />
         {children}

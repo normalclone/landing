@@ -11,6 +11,7 @@ import {
   type TransitionEvent,
 } from "react"
 import { createPortal } from "react-dom"
+import { dispatchScrollbarCompensationCheck } from "@/components/scrollbar/ScrollbarCompensationManager"
 
 export type Difficulty = "easy" | "medium" | "hard"
 export type ExamType = "THPT" | "Đại học" | "Công chức" | "Chứng chỉ"
@@ -145,10 +146,55 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
       }
 
       const body = document.body
+      const rootElement = document.documentElement
       if (lock) {
+        const scrollbarWidth = Math.max(window.innerWidth - rootElement.clientWidth, 0)
+
+        const previousRootCompensation =
+          rootElement.style.getPropertyValue("--scrollbar-compensation")
+        const previousBodyCompensation =
+          body.style.getPropertyValue("--scrollbar-compensation")
+
+        body.dataset.prevScrollbarCompensationRoot =
+          previousRootCompensation || "__EMPTY__"
+        body.dataset.prevScrollbarCompensationBody =
+          previousBodyCompensation || "__EMPTY__"
+
+        if (scrollbarWidth > 0) {
+          const compensation = `${scrollbarWidth}px`
+          rootElement.style.setProperty("--scrollbar-compensation", compensation)
+          body.style.setProperty("--scrollbar-compensation", compensation)
+        } else {
+          rootElement.style.removeProperty("--scrollbar-compensation")
+          body.style.removeProperty("--scrollbar-compensation")
+        }
+
         body.classList.add("modal-open")
       } else {
         body.classList.remove("modal-open")
+
+        const prevRoot = body.dataset.prevScrollbarCompensationRoot
+        const prevBody = body.dataset.prevScrollbarCompensationBody
+
+        if (prevRoot !== undefined) {
+          if (prevRoot === "__EMPTY__") {
+            rootElement.style.removeProperty("--scrollbar-compensation")
+          } else {
+            rootElement.style.setProperty("--scrollbar-compensation", prevRoot)
+          }
+          delete body.dataset.prevScrollbarCompensationRoot
+        }
+
+        if (prevBody !== undefined) {
+          if (prevBody === "__EMPTY__") {
+            body.style.removeProperty("--scrollbar-compensation")
+          } else {
+            body.style.setProperty("--scrollbar-compensation", prevBody)
+          }
+          delete body.dataset.prevScrollbarCompensationBody
+        }
+
+        dispatchScrollbarCompensationCheck()
       }
     },
     [isBrowser]
