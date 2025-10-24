@@ -139,6 +139,37 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     setIsBrowser(true)
   }, [])
 
+  const domRectToDocumentRect = useCallback((domRect: DOMRect): Rect => {
+    if (typeof window === "undefined") {
+      return {
+        top: domRect.top,
+        left: domRect.left,
+        width: domRect.width,
+        height: domRect.height,
+      }
+    }
+
+    return {
+      top: domRect.top + window.scrollY,
+      left: domRect.left + window.scrollX,
+      width: domRect.width,
+      height: domRect.height,
+    }
+  }, [])
+
+  const viewportRectToDocumentRect = useCallback((rect: Rect): Rect => {
+    if (typeof window === "undefined") {
+      return rect
+    }
+
+    return {
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+      height: rect.height,
+    }
+  }, [])
+
   const applyScrollLock = useCallback(
     (lock: boolean) => {
       if (!isBrowser) {
@@ -239,17 +270,12 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     const handleResize = () => {
       const nextTarget = calculateTargetRect()
       if (nextTarget) {
-        setTargetRect(nextTarget)
+        setTargetRect(viewportRectToDocumentRect(nextTarget))
       }
       if (isTransitionActive && !isModalPinned) {
         const nextRect = cardRef.current?.getBoundingClientRect()
         if (nextRect) {
-          setTransitionRect({
-            top: nextRect.top,
-            left: nextRect.left,
-            width: nextRect.width,
-            height: nextRect.height,
-          })
+          setTransitionRect(domRectToDocumentRect(nextRect))
         }
       }
     }
@@ -262,7 +288,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
       window.removeEventListener("resize", handleResize)
       window.removeEventListener("orientationchange", handleResize)
     }
-  }, [calculateTargetRect, isBrowser, isModalPinned, isTransitionActive])
+  }, [calculateTargetRect, domRectToDocumentRect, isBrowser, isModalPinned, isTransitionActive, viewportRectToDocumentRect])
 
   const closeModal = useCallback(() => {
     if (!isBrowser) {
@@ -276,12 +302,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     const originRect = cardRef.current?.getBoundingClientRect()
 
     if (originRect) {
-      setTransitionRect({
-        top: originRect.top,
-        left: originRect.left,
-        width: originRect.width,
-        height: originRect.height,
-      })
+      setTransitionRect(domRectToDocumentRect(originRect))
       setIsTransitionActive(true)
       requestAnimationFrame(() => setIsTransitionExpanded(false))
     } else {
@@ -295,7 +316,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     setIsClosing(true)
     setShowDetails(false)
     setIsModalPinned(false)
-  }, [isBrowser, isModalPinned])
+  }, [domRectToDocumentRect, isBrowser, isModalPinned])
 
   useEffect(() => {
     if (!isBrowser || !isModalPinned) {
@@ -326,8 +347,12 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
 
     applyScrollLock(true)
 
+    // Force a reflow so measurements include scroll lock adjustments
+    void cardRef.current?.offsetHeight
+
     const lockedRect = cardRef.current?.getBoundingClientRect()
     const startRect = lockedRect ?? rect
+    const startDocumentRect = domRectToDocumentRect(startRect)
 
     const target = calculateTargetRect()
     if (!target) {
@@ -335,13 +360,8 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
       return
     }
 
-    setTransitionRect({
-      top: startRect.top,
-      left: startRect.left,
-      width: startRect.width,
-      height: startRect.height,
-    })
-    setTargetRect(target)
+    setTransitionRect(startDocumentRect)
+    setTargetRect(viewportRectToDocumentRect(target))
     setIsTransitionExpanded(false)
     setIsTransitionActive(true)
     setIsModalPinned(false)
@@ -383,14 +403,16 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
 
   const transitionDuration = isClosing ? 220 : 320
   const boxShadowDuration = Math.max(transitionDuration - 40, 140)
+  const scrollX = typeof window !== "undefined" ? window.scrollX : 0
+  const scrollY = typeof window !== "undefined" ? window.scrollY : 0
   const transitionStyle: CSSProperties | undefined = currentTransitionRect
     ? {
       position: "fixed",
-      top: `${currentTransitionRect.top}px`,
-      left: `${currentTransitionRect.left}px`,
+      top: `${currentTransitionRect.top - scrollY + 6}px`,
+      left: `${currentTransitionRect.left - scrollX}px`,
       width: `${currentTransitionRect.width}px`,
       height: `${currentTransitionRect.height}px`,
-      borderRadius: isTransitionExpanded ? "1rem" : "0.95rem",
+      borderRadius: "var(--bs-border-radius)",
       transition: [
         `top ${transitionDuration}ms cubic-bezier(0.25, 0.8, 0.25, 1)`,
         `left ${transitionDuration}ms cubic-bezier(0.25, 0.8, 0.25, 1)`,
@@ -645,7 +667,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
     )
   }
 
-  const renderCardSummary = (withDetails = false) => {
+  const renderCardSummary = (withDetails = false, showCta = false) => {
     const cardBodyClassName = `card-body d-flex flex-column ${withDetails ? "exam-card-body--expanded" : ""
       }`
     const cardBodyStyle: CSSProperties | undefined = withDetails ? { height: "100%" } : undefined
@@ -667,7 +689,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
                 </span>
               </div>
             </div>
-            {withDetails ? (
+            {withDetails && showCta ? (
               <button type="button" className="btn btn-honey exam-card-summary__cta">
                 Thi Ngay
               </button>
@@ -741,7 +763,7 @@ export const ExamCard: FC<ExamCardProps> = ({ exam }) => {
               onTransitionEnd={handleTransitionEnd}
               aria-hidden
             >
-              {renderCardSummary(true)}
+              {renderCardSummary(true, isTransitionExpanded)}
             </div>
           </>,
           document.body
