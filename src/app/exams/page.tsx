@@ -437,7 +437,7 @@ export default function ExamsPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const sentinelObserverRef = useRef<IntersectionObserver | null>(null)
@@ -528,6 +528,7 @@ export default function ExamsPage() {
 
   // Reset phân trang khi tham số tìm kiếm thay đổi
   useEffect(() => {
+    setIsLoading(true)
     setExams([])
     setHasMore(true)
     setPage(1)
@@ -605,6 +606,7 @@ export default function ExamsPage() {
     sentinelObserverRef.current = new IntersectionObserver((entries) => {
       const targetEntry = entries[0]
       if (targetEntry?.isIntersecting && hasMore && !isLoading) {
+        setIsLoading(true)
         setPage((prev) => prev + 1)
       }
     })

@@ -225,11 +225,11 @@ export default function HomePage() {
                   </a>
                   <a
                     className="btn btn-indigo"
-                    href="#leaderboard"
+                    href="/ranking"
                     role="button"
-                    aria-label="Xem bảng xếp hạng"
+                    aria-label="Bảng xếp hạng"
                   >
-                    Xem bảng xếp hạng
+                    Bảng xếp hạng
                   </a>
                 </div>
               </div>
@@ -590,3 +590,5 @@ export default function HomePage() {
     </>
   )
 }
+
+
